@@ -23,6 +23,7 @@ runs:
   using: "composite"
   steps:
     - name: 'Get Last Semver'
+      id: semver_last
       shell: bash
       # language=BASH
       run: |
@@ -87,3 +88,44 @@ runs:
         set -e
         echo "PR Target: $GITHUB_BASE_REF"
         echo "PR Source: $GITHUB_HEAD_REF"
+        
+        branchType="$(echo "$sourceBranch" | grep -oi 'major|minor|patch')"
+        branchType="${branchType,,}"
+        
+        if [ -z "$branchType" ]; then
+          echo "Branch type could not be detected (major, minor, patch not found in branch name)" >&2
+         exit 1
+        fi
+        
+        echo "Branch type: $branchType"
+        
+        semverMajor='${{ steps.semver_last.lastMajor }}'
+        semverMinor='${{ steps.semver_last.lastMinor }}'
+        semverPatch='${{ steps.semver_last.lastPatch }}'
+        
+        case "$branchType" in
+          major)
+            ((semverMajor++))
+            ;;
+          minor)
+            ((semverMinor++))
+            ;;
+          patch)
+            ((semverPatch++))
+            ;;
+          *)
+            echo "Unsupported branch type $branchType" >&2
+            exit 1
+        esac
+        
+        prefix='${{ inputs.prefix }}'
+        suffix='${{ inputs.suffix }}'
+        
+        semverNext="$semverMajor.$semverMinor.$semverPatch"
+        tagNext="${prefix}${semverNext}${suffix}"
+        
+        echo "Next Semver: $semverNext"
+        echo "Next Tag: $tagNext"
+        
+        echo "semverNext=$semverNext" >> "$GITHUB_OUTPUT"
+        echo "tagNext=$tagNext" >> "$GITHUB_OUTPUT"
