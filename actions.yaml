@@ -1,0 +1,89 @@
+name: 'Create CI/CD Semver Release'
+description: 'Create a ci/cd release based on the ordinary git flow.'
+inputs:
+  prefix:
+    type: string
+    description: 'Prefix to add to semver'
+    default: 'v'
+  suffix:
+    type: string
+    description: 'Suffix to add to semver'
+    default: ''
+  strict_semver_last:
+    type: boolean
+    description: 'When detecting last semver, requires the semver to have the configured prefix and suffix'
+  create_release:
+    type: boolean
+    default: true
+outputs:
+  release_tag:
+    description: "Release tag"
+    value: ${{ steps.create_release.outputs.release_tag }}
+runs:
+  using: "composite"
+  steps:
+    - name: 'Get Last Semver'
+      shell: bash
+      # language=BASH
+      run: |
+        set -e
+        
+        echo 'Strict semver match: ${{ inputs.strict_semver_last }}}}'
+        
+        function filterPrefix() {
+          prefix='${{ inputs.prefix }}'
+        
+          if [ -z "$prefix" ]; then
+            cat
+            return 0
+          fi
+        
+          while read -r line; do
+            if [ "${line:0:${#prefix}}" == "$prefix" ]; then
+              echo "$line"
+            fi
+          done
+        }
+        
+        function filterSuffix() {
+          suffix='${{ inputs.suffix }}'
+        
+          if [ -z "$suffix" ]; then
+            cat
+            return 0
+          fi
+        
+          while read -r line; do
+            if [ "${line: ${#suffix}}" == "$suffix" ]; then
+              echo "$line"
+            fi
+          done
+        }
+        
+        tagMatch="$(git tag | filterPrefix | filterSuffix | head -n 1)"
+        
+        if [ -z "$tagMatch" ]; then
+          echo "No tag found - assuming semver 0.0.0 as last tag"
+          echo 'lastSemver=0.0.0' >> "$GITHUB_OUTPUT"
+          echo 'lastTag=' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        
+        semverMatch="$(echo "$tagMatch" | grep -Po '(?<!\d)\d+\.\d+\.\d+(?!\d)')"
+        IFS=. read lastMajor lastMinor lastPatch <<< "$semverMatch"
+        
+        echo "Last tag: $tagMatch"
+        echo "Last semver: $semverMatch"
+        
+        echo "lastTag=$tagMatch" >> "$GITHUB_OUTPUT"
+        echo "lastSemver=$semverMatch" >> "$GITHUB_OUTPUT"
+        echo "lastMajor=$lastMajor" >> "$GITHUB_OUTPUT"
+        echo "lastMinor=$lastMinor" >> "$GITHUB_OUTPUT"
+        echo "lastPatch=$lastPatch" >> "$GITHUB_OUTPUT"
+    - name: "Get next semver"
+      shell: bash
+      # language=BASH
+      run: |
+        set -e
+        echo "PR Target: $GITHUB_BASE_REF"
+        echo "PR Source: $GITHUB_HEAD_REF"
