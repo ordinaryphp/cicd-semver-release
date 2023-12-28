@@ -32,14 +32,12 @@ runs:
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
         prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
         echo "$prPayloadUrl"
-        labels="$(gh api "$prPayloadUrl" --jq '.labels.[].name')"
+        labels="$(gh api "$prPayloadUrl" --jq '.labels.[].name' --json)"
         echo "$labels"
     - name: 'Get Pull Request Data'
       id: pr_data
       shell: bash
       env:
-        debugVar: ${{ toJSON(github) }}
-        allLabels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
         isBug: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
         isEnhancement: ${{ contains(github.event.pull_request.labels.*.name, 'enhancement') }}
         isBc: ${{ contains(github.event.pull_request.labels.*.name, 'backward-compatible') }}
@@ -51,10 +49,6 @@ runs:
         isEnhancement=$isEnhancement
         isBc=$isBc
         isNotBc=$isNotBc
-        
-        Labels: $allLabels
-        
-        Debug: $debugVar
         EOF
     - name: 'Get Last Semver'
       id: semver_last
