@@ -32,16 +32,17 @@ runs:
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
         prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
         echo "$prPayloadUrl"
-        labels="$(gh api -H "Accept: application/vnd.github+json" "$prPayloadUrl" | jq '[.labels[].name]')"
+        labels="$(gh api -H "Accept: application/vnd.github+json" "$prPayloadUrl" | jq -c '[.labels[].name]')"
         echo "$labels"
+        echo "pr_labels=$labels" >> "$GITHUB_OUTPUT"
     - name: 'Get Pull Request Data'
       id: pr_data
       shell: bash
       env:
-        isBug: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
-        isEnhancement: ${{ contains(github.event.pull_request.labels.*.name, 'enhancement') }}
-        isBc: ${{ contains(github.event.pull_request.labels.*.name, 'backward-compatible') }}
-        isNotBc: ${{ contains(github.event.pull_request.labels.*.name, 'not-backward-compatible') }}
+        isBug: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'bug') }}
+        isEnhancement: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'enhancement') }}
+        isBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'backward-compatible') }}
+        isNotBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'not-backward-compatible') }}
       # language=BASH
       run: |
         cat <<EOF
