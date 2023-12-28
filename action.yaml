@@ -83,6 +83,8 @@ runs:
       shell: bash
       # language=BASH
       run: |
+        set +e
+        
         echo "PR Target: $GITHUB_BASE_REF"
         echo "PR Source: $GITHUB_HEAD_REF"
         
