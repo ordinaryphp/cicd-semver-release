@@ -92,6 +92,8 @@ runs:
         branchType="$(echo "$sourceBranch" | grep -oi 'major|minor|patch')"
         branchType="${branchType,,}"
         
+        echo "before branch type check"
+        
         if [ -z "$branchType" ]; then
           echo "non stderr"
           echo "Branch type could not be detected (major, minor, patch not found in branch name)" >&2
