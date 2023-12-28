@@ -27,8 +27,6 @@ runs:
       shell: bash
       # language=BASH
       run: |
-        set -e
-        
         echo 'Strict semver match: ${{ inputs.strict_semver_last }}'
         
         function filterPrefix() {
@@ -85,7 +83,6 @@ runs:
       shell: bash
       # language=BASH
       run: |
-        set -e
         echo "PR Target: $GITHUB_BASE_REF"
         echo "PR Source: $GITHUB_HEAD_REF"
         
