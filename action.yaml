@@ -27,6 +27,8 @@ runs:
       shell: bash
       # language=BASH
       run: |
+        set +e
+        
         echo 'Strict semver match: ${{ inputs.strict_semver_last }}'
         
         function filterPrefix() {
@@ -85,8 +87,11 @@ runs:
       run: |
         set +e
         
-        echo "PR Target: $GITHUB_BASE_REF"
-        echo "PR Source: $GITHUB_HEAD_REF"
+        sourceBranch="$GITHUB_HEAD_REF"
+        targetBranch="$GITHUB_BASE_REF"
+        
+        echo "PR Source: $sourceBranch"
+        echo "PR Target: $targetBranch"
         
         branchType="$(echo "$sourceBranch" | grep -oi 'major\|minor\|patch')"
         branchType="${branchType,,}"
