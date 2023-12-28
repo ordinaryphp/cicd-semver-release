@@ -29,7 +29,7 @@ runs:
       run: |
         set -e
         
-        echo 'Strict semver match: ${{ inputs.strict_semver_last }}}}'
+        echo 'Strict semver match: ${{ inputs.strict_semver_last }}'
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
@@ -93,8 +93,9 @@ runs:
         branchType="${branchType,,}"
         
         if [ -z "$branchType" ]; then
+          echo "non stderr"
           echo "Branch type could not be detected (major, minor, patch not found in branch name)" >&2
-         exit 1
+          exit 1
         fi
         
         echo "Branch type: $branchType"
