@@ -72,7 +72,7 @@ runs:
         
         IFS=. read lastMajor lastMinor lastPatch <<< "$semverMatch"
         
-        echo "Last tag: $tagMatch"
+        echo "Last tag: ${tagMatch:-(NONE)}"
         echo "Last semver: $semverMatch"
         echo "  Major: $lastMajor"
         echo "  Minor: $lastMinor"
@@ -105,9 +105,9 @@ runs:
         
         echo "Branch type: $branchType"
         
-        semverMajor='${{ steps.semver_last.lastMajor }}'
-        semverMinor='${{ steps.semver_last.lastMinor }}'
-        semverPatch='${{ steps.semver_last.lastPatch }}'
+        semverMajor='${{ steps.semver_last.outputs.lastMajor }}'
+        semverMinor='${{ steps.semver_last.outputs.lastMinor }}'
+        semverPatch='${{ steps.semver_last.outputs.lastPatch }}'
         
         case "$branchType" in
           major)
