@@ -26,6 +26,7 @@ runs:
       id: pr_data
       shell: bash
       env:
+        debugVar: ${{ toJSON(github) }}
         allLabels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
         isBug: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
         isEnhancement: ${{ contains(github.event.pull_request.labels.*.name, 'enhancement') }}
@@ -40,6 +41,8 @@ runs:
         isNotBc=$isNotBc
         
         Labels: $allLabels
+        
+        Debug: $debugVar
         EOF
     - name: 'Get Last Semver'
       id: semver_last
