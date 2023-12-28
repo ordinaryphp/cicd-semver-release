@@ -65,16 +65,18 @@ runs:
         
         if [ -z "$tagMatch" ]; then
           echo "No tag found - assuming semver 0.0.0 as last tag"
-          echo 'lastSemver=0.0.0' >> "$GITHUB_OUTPUT"
-          echo 'lastTag=' >> "$GITHUB_OUTPUT"
-          exit 0
+          semverMatch="0.0.0"
+        else
+          semverMatch="$(echo "$tagMatch" | grep -Po '(?<!\d)\d+\.\d+\.\d+(?!\d)')"
         fi
         
-        semverMatch="$(echo "$tagMatch" | grep -Po '(?<!\d)\d+\.\d+\.\d+(?!\d)')"
         IFS=. read lastMajor lastMinor lastPatch <<< "$semverMatch"
         
         echo "Last tag: $tagMatch"
         echo "Last semver: $semverMatch"
+        echo "  Major: $lastMajor"
+        echo "  Minor: $lastMinor"
+        echo "  Patch: $lastPatch"
         
         echo "lastTag=$tagMatch" >> "$GITHUB_OUTPUT"
         echo "lastSemver=$semverMatch" >> "$GITHUB_OUTPUT"
