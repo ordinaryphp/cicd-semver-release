@@ -22,6 +22,15 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: 'Get Labels'
+      id: get_labels
+      shell: bash
+      # language=BASH
+      run: |
+        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$GITHUB_REF_NAME"
+        echo "$prPayloadUrl"
+        labels="$(gh api "$prPayloadUrl" --jq '.labels.[].name')"
+        echo "$labels"
     - name: 'Get Pull Request Data'
       id: pr_data
       shell: bash
