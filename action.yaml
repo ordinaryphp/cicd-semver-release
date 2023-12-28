@@ -26,17 +26,20 @@ runs:
       id: pr_data
       shell: bash
       env:
+        allLabels: ${{ join(github.event.pull_request.labels.*.name, ', ') }}
         isBug: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
-        isFeature: ${{ contains(github.event.pull_request.labels.*.name, 'feature') }}
+        isEnhancement: ${{ contains(github.event.pull_request.labels.*.name, 'enhancement') }}
         isBc: ${{ contains(github.event.pull_request.labels.*.name, 'backward-compatible') }}
         isNotBc: ${{ contains(github.event.pull_request.labels.*.name, 'not-backward-compatible') }}
       # language=BASH
       run: |
         cat <<EOF
         isBug=$isBug
-        isFeature=$isFeature
+        isEnhancement=$isEnhancement
         isBc=$isBc
         isNotBc=$isNotBc
+        
+        Labels: $allLabels
         EOF
     - name: 'Get Last Semver'
       id: semver_last
