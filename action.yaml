@@ -76,8 +76,8 @@ runs:
         [ "$isBug" == "true" ] && changeType="bug"
         [ "$isEnhancement" == "true" ] && changeType="enhancement"
         
-        echo 'Change Type: $changeType"
-        echo 'Compatibility Type: $changeCompat"
+        echo "Change Type: $changeType"
+        echo "Compatibility Type: $changeCompat"
         
         echo "change_type=$changeType" >> "GITHUB_OUTPUT"
         echo "change_compatibility=$changeCompat" >> "GITHUB_OUTPUT"
