@@ -26,10 +26,10 @@ runs:
       id: pr_data
       shell: bash
       env:
-        isBug: ${{ contains(github.event.issue.labels.*.name, 'bug') }}
-        isFeature: ${{ contains(github.event.issue.labels.*.name, 'feature') }}
-        isBc: ${{ contains(github.event.issue.labels.*.name, 'backward-compatible') }}
-        isNotBc: ${{ contains(github.event.issue.labels.*.name, 'not-backward-compatible') }}
+        isBug: ${{ contains(github.event.pull_request.labels.*.name, 'bug') }}
+        isFeature: ${{ contains(github.event.pull_request.labels.*.name, 'feature') }}
+        isBc: ${{ contains(github.event.pull_request.labels.*.name, 'backward-compatible') }}
+        isNotBc: ${{ contains(github.event.pull_request.labels.*.name, 'not-backward-compatible') }}
       # language=BASH
       run: |
         cat <<EOF
