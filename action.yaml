@@ -25,9 +25,12 @@ runs:
     - name: 'Get Labels'
       id: get_labels
       shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
       # language=BASH
       run: |
-        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$GITHUB_REF_NAME"
+        prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
+        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
         echo "$prPayloadUrl"
         labels="$(gh api "$prPayloadUrl" --jq '.labels.[].name')"
         echo "$labels"
