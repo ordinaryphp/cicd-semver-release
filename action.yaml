@@ -22,6 +22,22 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: 'Get Pull Request Data'
+      id: pr_data
+      shell: bash
+      env:
+        isBug: ${{ contains(github.event.issue.labels.*.name, 'bug') }}
+        isFeature: ${{ contains(github.event.issue.labels.*.name, 'feature') }}
+        isBc: ${{ contains(github.event.issue.labels.*.name, 'backward-compatible') }}
+        isNotBc: ${{ contains(github.event.issue.labels.*.name, 'not-backward-compatible') }}
+      # language=BASH
+      run: |
+        cat <<EOF
+        isBug=$isBug
+        isFeature=$isFeature
+        isBc=$isBc
+        isNotBc=$isNotBc
+        EOF
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
