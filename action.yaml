@@ -31,9 +31,9 @@ runs:
       run: |
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
         prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
-        echo "$prPayloadUrl"
+        
         labels="$(gh api -H "Accept: application/vnd.github+json" "$prPayloadUrl" | jq -c '[.labels[].name]')"
-        echo "$labels"
+        echo "Labels: $labels"
         echo "pr_labels=$labels" >> "$GITHUB_OUTPUT"
     - name: 'Get Pull Request Data'
       id: pr_data
@@ -45,12 +45,39 @@ runs:
         isNotBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'not-backward-compatible') }}
       # language=BASH
       run: |
-        cat <<EOF
-        isBug=$isBug
-        isEnhancement=$isEnhancement
-        isBc=$isBc
-        isNotBc=$isNotBc
-        EOF
+        hasError=false
+        
+        if [ "$isBug" == "false" ] && [ "$isEnhancement" == "false" ]; then
+          echo "Missing ONE of required tags (bug || enhancement)" >&2
+          hasError=true
+        fi
+        
+        if [ "$isBug" == "true" ] && [ "$isEnhancement" == "true" ]; then
+          echo "Conflicting tags (bug && enhancement)" >&2
+          hasError=true
+        fi
+        
+        if [ "$isBc" == "false" ] && [ "$isNotBc" == "false" ]; then
+          echo "Missing ONE of required tags (backward-compatible || not-backward-compatible)" >&2
+          hasError=true
+        fi
+        
+        if [ "$isBc" == "true" ] && [ "$isNotBc" == "true" ]; then
+          echo "Conflicting tags (backward-compatible && not-backward-compatible)" >&2
+          hasError=true
+        fi
+        
+        if [ "$hasError" == "true" ]; then
+         exit 1
+        fi
+        
+        [ "$isBc" == "true" ] && changeCompat="backward-compatible"
+        [ "$isNotBc" == "true" ] && changeCompat="not-backward-compatible"
+        [ "$isBug" == "true" ] && changeType="bug"
+        [ "$isEnhancement" == "true" ] && changeType="enhancement"
+        
+        echo "change_type=$changeType" >> "GITHUB_OUTPUT"
+        echo "change_compatibility=$changeCompat" >> "GITHUB_OUTPUT"
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
@@ -114,43 +141,30 @@ runs:
         echo "lastPatch=$lastPatch" >> "$GITHUB_OUTPUT"
     - name: "Get next semver"
       shell: bash
+      env:
+        changeType: ${{ steps.pr_data.outputs.change_type }}
+        changeCompatibility: ${{ steps.pr_data.outputs.change_compatibility }}
       # language=BASH
       run: |
         set +e
-        
-        sourceBranch="$GITHUB_HEAD_REF"
-        targetBranch="$GITHUB_BASE_REF"
-        
-        echo "PR Source: $sourceBranch"
-        echo "PR Target: $targetBranch"
-        
-        branchType="$(echo "$sourceBranch" | grep -oi 'major\|minor\|patch')"
-        branchType="${branchType,,}"
-        
-        if [ -z "$branchType" ]; then
-          echo "Branch type could not be detected (major, minor, patch not found in branch name)" >&2
-          exit 1
-        fi
-        
-        echo "Branch type: $branchType"
-        
         semverMajor='${{ steps.semver_last.outputs.lastMajor }}'
         semverMinor='${{ steps.semver_last.outputs.lastMinor }}'
         semverPatch='${{ steps.semver_last.outputs.lastPatch }}'
         
-        case "$branchType" in
-          major)
+        case "$changeCompatibility:$changeType" in
+          not-backward-compatible:*)
             ((semverMajor++))
             ;;
-          minor)
+          backward-compatible:enhancement)
             ((semverMinor++))
             ;;
-          patch)
+          backward-compatible:bug)
             ((semverPatch++))
             ;;
           *)
-            echo "Unsupported branch type $branchType" >&2
+            echo "Unsupported change type $changeCompatibility:$changeType" >&2
             exit 1
+            ;;
         esac
         
         prefix='${{ inputs.prefix }}'
