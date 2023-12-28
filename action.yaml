@@ -79,8 +79,8 @@ runs:
         echo "Change Type: $changeType"
         echo "Compatibility Type: $changeCompat"
         
-        echo "change_type=$changeType" >> "GITHUB_OUTPUT"
-        echo "change_compatibility=$changeCompat" >> "GITHUB_OUTPUT"
+        echo "change_type=$changeType" >> "$GITHUB_OUTPUT"
+        echo "change_compatibility=$changeCompat" >> "$GITHUB_OUTPUT"
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
