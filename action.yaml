@@ -30,9 +30,9 @@ runs:
       # language=BASH
       run: |
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
-        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
+        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber/labels"
         echo "$prPayloadUrl"
-        labels="$(gh api "$prPayloadUrl" --jq '.labels.[].name' --json)"
+        labels="$(gh api -H "Accept: application/vnd.github+json" "$prPayloadUrl" | jq '[.[].name]')"
         echo "$labels"
     - name: 'Get Pull Request Data'
       id: pr_data
