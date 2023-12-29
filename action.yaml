@@ -166,6 +166,8 @@ runs:
           while read -r line; do
             if [ "${line:0:${#prefix}}" == "$prefix" ]; then
               echo "$line"
+            else
+              echo "Skipped by prefix $line"
             fi
           done
         }
@@ -181,6 +183,8 @@ runs:
           while read -r line; do
             if [ "${line: ${#suffix}}" == "$suffix" ]; then
               echo "$line"
+            else
+              echo "Skipped by prefix $line"
             fi
           done
         }
