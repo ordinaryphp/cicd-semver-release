@@ -155,13 +155,14 @@ runs:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
-        tagList: ${{ join(steps.get_tags.outputs.data.*.ref, '\n') }}
+        tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, '\n') }}
       # language=BASH
       run: |
         set +e
         
         echo "Strict semver matching: $strictSemver"
         echo 'Tags: ${{ steps.get_tags.outputs.data }}'
+        echo "TagList: $tagList"
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
