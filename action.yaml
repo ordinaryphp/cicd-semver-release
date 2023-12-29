@@ -195,7 +195,9 @@ runs:
           done
         }
         
+        echo "Merge complete: $isMergeComplete"
         if [ "$isMergeComplete" == "true" ]; then
+          echo "Describe: $(git describe --tags --exact-match "$mergeCommit")"
           existingMergeTag="$(git describe --tags --exact-match "$mergeCommit" | filterPrefix | filterSuffix)"
         
           if [ -n "$existingMergeTag" ]; then
