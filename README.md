@@ -30,17 +30,18 @@ jobs:
 
 <!-- start inputs -->
 
-| **<b>Input</b>**                                  | **<b>Description</b>**                                                                   | **<b>Default</b>**                   | **<b>Required</b>** |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------ | ------------------- |
-| <b><code>prefix</code></b>                        | Prefix to add to semver                                                                  | <code>v</code>                       | **false**           |
-| <b><code>suffix</code></b>                        | Suffix to add to semver                                                                  |                                      | **false**           |
-| <b><code>strict_semver_last</code></b>            | When detecting last semver, requires the semver to have the configured prefix and suffix |                                      | **false**           |
-| <b><code>create_release</code></b>                |                                                                                          | <code>true</code>                    | **false**           |
-| <b><code>create_if_pr_complete</code></b>         | Disable to allow release creation when trigger is not a completed pull request           | <code>true</code>                    | **false**           |
-| <b><code>enhancement_label</code></b>             | Label that indicates changes includes enhancements or new features                       | <code>enhancement</code>             | **false**           |
-| <b><code>bug_label</code></b>                     | Label that indicates changes includes bug fixes                                          | <code>bug</code>                     | **false**           |
-| <b><code>backward_compatible_label</code></b>     | Label that indicates changes are backward compatible                                     | <code>backward-compatible</code>     | **false**           |
-| <b><code>not_backward_compatible_label</code></b> | Label that indicates changes are not backward compatible                                 | <code>not-backward-compatible</code> | **false**           |
+| **<b>Input</b>**                                  | **<b>Description</b>**                                                                                            | **<b>Default</b>**                   | **<b>Required</b>** |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------- |
+| <b><code>token</code></b>                         | Custom app or personal access token to use for release creation. (Required if tag push should trigger a workflow) |                                      | **false**           |
+| <b><code>prefix</code></b>                        | Prefix to add to semver                                                                                           | <code>v</code>                       | **false**           |
+| <b><code>suffix</code></b>                        | Suffix to add to semver                                                                                           |                                      | **false**           |
+| <b><code>strict_semver_last</code></b>            | When detecting last semver, requires the semver to have the configured prefix and suffix                          |                                      | **false**           |
+| <b><code>create_release</code></b>                |                                                                                                                   | <code>true</code>                    | **false**           |
+| <b><code>create_if_pr_complete</code></b>         | Disable to allow release creation when trigger is not a completed pull request                                    | <code>true</code>                    | **false**           |
+| <b><code>enhancement_label</code></b>             | Label that indicates changes includes enhancements or new features                                                | <code>enhancement</code>             | **false**           |
+| <b><code>bug_label</code></b>                     | Label that indicates changes includes bug fixes                                                                   | <code>bug</code>                     | **false**           |
+| <b><code>backward_compatible_label</code></b>     | Label that indicates changes are backward compatible                                                              | <code>backward-compatible</code>     | **false**           |
+| <b><code>not_backward_compatible_label</code></b> | Label that indicates changes are not backward compatible                                                          | <code>not-backward-compatible</code> | **false**           |
 
 <!-- end inputs -->
 

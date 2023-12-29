@@ -1,6 +1,9 @@
 name: 'Create CI/CD Semver Release'
 description: 'Automatically create a release on pull request completion.'
 inputs:
+  token:
+    type: string
+    description: 'Custom app or personal access token to use for release creation. (Required if tag push should trigger a workflow)'
   prefix:
     type: string
     description: 'Prefix to add to semver'
@@ -261,7 +264,7 @@ runs:
       if: inputs.create_release && (!inputs.create_if_pr_complete || github.event.pull_request.merged == true)
       shell: bash
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ input.token || github.token }}
         releaseTag: ${{ steps.semver_next.outputs.next_tag }}
         releaseSemver: ${{ steps.semver_next.outputs.next_semver }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
