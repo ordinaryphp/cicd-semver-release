@@ -12,6 +12,7 @@ inputs:
   strict_semver_last:
     type: boolean
     description: 'When detecting last semver, requires the semver to have the configured prefix and suffix'
+    default: false
   create_release:
     type: boolean
     default: true
