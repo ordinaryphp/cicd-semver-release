@@ -188,5 +188,5 @@ runs:
         echo "Next Semver: $semverNext"
         echo "Next Tag: $tagNext"
         
-        echo "semver_next=$semverNext" >> "$GITHUB_OUTPUT"
-        echo "tag_next=$tagNext" >> "$GITHUB_OUTPUT"
+        echo "next_semver=$semverNext" >> "$GITHUB_OUTPUT"
+        echo "next_tag=$tagNext" >> "$GITHUB_OUTPUT"
