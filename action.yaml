@@ -30,6 +30,7 @@ runs:
         GH_TOKEN: ${{ github.token }}
       # language=BASH
       run: |
+        set +e
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
         prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
         
@@ -46,6 +47,7 @@ runs:
         isNotBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'not-backward-compatible') }}
       # language=BASH
       run: |
+        set +e
         hasError=false
         
         if [ "$isBug" == "false" ] && [ "$isEnhancement" == "false" ]; then
