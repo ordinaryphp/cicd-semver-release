@@ -1,0 +1,13 @@
+{
+  "name": "cicd-semver-release",
+  "description": "Automatically create a release on pull request completion.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ghadocs": "nodejs node_modules/.bin/github-action-readme-generator"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "github-action-readme-generator": "v1.7.2"
+  }
+}
