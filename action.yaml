@@ -16,6 +16,22 @@ inputs:
   create_release:
     type: boolean
     default: true
+  enhancement_label:
+    type: string
+    description: 'Label that indicates changes includes enhancements or new features'
+    default: enhancement
+  bug_label:
+    type: string
+    description: 'Label that indicates changes includes bug fixes'
+    default: bug
+  backward_compatible_label:
+    type: string
+    description: 'Label that indicates changes are backward compatible'
+    default: backward-compatible
+  not_backward_compatible_label:
+    type: string
+    description: 'Label that indicates changes are not backward compatible'
+    default: not-backward-compatible
 outputs:
   tag_last:
     description: "Last semver tag detected"
@@ -56,10 +72,10 @@ runs:
       id: pr_data
       shell: bash
       env:
-        isBug: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'bug') }}
-        isEnhancement: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'enhancement') }}
-        isBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'backward-compatible') }}
-        isNotBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), 'not-backward-compatible') }}
+        isBug: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), inputs.bug_label) }}
+        isEnhancement: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), inputs.enhancement_label) }}
+        isBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), inputs.backward_compatible_label) }}
+        isNotBc: ${{ contains(fromJSON(steps.get_labels.outputs.pr_labels), inputs.not_backward_compatible_label) }}
       # language=BASH
       run: |
         set +e
