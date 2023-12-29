@@ -67,7 +67,6 @@ runs:
       # language=BASH
       run: |
         set +e
-        prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
         prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
         
         echo "GH Api Get: $prPayloadUrl"
