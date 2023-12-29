@@ -148,6 +148,7 @@ runs:
         echo "lastMinor=$lastMinor" >> "$GITHUB_OUTPUT"
         echo "lastPatch=$lastPatch" >> "$GITHUB_OUTPUT"
     - name: "Get next semver"
+      id: semver_next
       shell: bash
       env:
         changeType: ${{ steps.pr_data.outputs.change_type }}
