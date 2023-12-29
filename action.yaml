@@ -1,5 +1,5 @@
 name: 'Create CI/CD Semver Release'
-description: 'Create a ci/cd release based on the ordinary git flow.'
+description: 'Automatically create a release on pull request completion.'
 inputs:
   prefix:
     type: string
