@@ -155,7 +155,7 @@ runs:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
-        tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, "\n") }}
+        tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, '\\n') }}
       # language=BASH
       run: |
         set +e
