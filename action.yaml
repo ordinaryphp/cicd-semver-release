@@ -157,9 +157,12 @@ runs:
         case "$changeCompatibility:$changeType" in
           not-backward-compatible:*)
             ((semverMajor++))
+            semverMinor=0
+            semverPatch=0
             ;;
           backward-compatible:enhancement)
             ((semverMinor++))
+            semverPatch=0
             ;;
           backward-compatible:bug)
             ((semverPatch++))
