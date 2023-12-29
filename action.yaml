@@ -91,12 +91,14 @@ runs:
       run: |
         set +e
         
-        echo 'Strict semver match: ${{ inputs.strict_semver_last }}'
+        strictSemver='${{ inputs.strict_semver_last }}'
+        
+        echo "Strict semver matching: $strictSemver"
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
         
-          if [ -z "$prefix" ]; then
+          if [ -z "$prefix" ] || [ "$strictSemver" == "false" ]; then
             cat
             return 0
           fi
@@ -111,7 +113,7 @@ runs:
         function filterSuffix() {
           suffix='${{ inputs.suffix }}'
         
-          if [ -z "$suffix" ]; then
+          if [ -z "$suffix" ] || [ "$strictSemver" == "false" ]; then
             cat
             return 0
           fi
