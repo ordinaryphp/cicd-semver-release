@@ -39,10 +39,6 @@ inputs:
     type: string
     description: 'Label that indicates changes are not backward compatible'
     default: not-backward-compatible
-  newline:
-    type: string
-    default: |
-      
 
 outputs:
   tag_last:
@@ -160,12 +156,12 @@ runs:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
-        tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, inputs.newline) }}
+        tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, ' ') }}
       # language=BASH
       run: |
         set +e
         
-        tagList="$(cut -d/ -f3- <<< "$tagList")"
+        tagList="$(sed 's/ /\n/g' <<< "$tagList" | cut -d/ -f3-)"
         echo "Strict semver matching: $strictSemver"
         echo "TagList: $tagList"
         
