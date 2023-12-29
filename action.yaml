@@ -239,8 +239,14 @@ runs:
       id: create_release
       if: inputs.create_release && (!inputs.create_if_pr_complete || github.event.pull_request.merged == true)
       shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        releaseTag: ${{ steps.semver_next.outputs.next_tag }}
+        releaseSemver: ${{ steps.semver_next.outputs.next_semver }}
+        mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
       # language=BASH
       run: |
-        set +e
+        set -e
         
         echo "Creating release"
+        gh release create "$releaseTag" --target "$mergeCommit" --title "Release: $releaseSemver ($releaseTag)" --generate-notes --latest
