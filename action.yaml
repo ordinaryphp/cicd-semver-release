@@ -63,11 +63,12 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
       # language=BASH
       run: |
         set +e
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
-        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
+        prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
         
         echo "GH Api Get: $prPayloadUrl"
         
