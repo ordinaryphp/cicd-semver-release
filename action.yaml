@@ -17,9 +17,24 @@ inputs:
     type: boolean
     default: true
 outputs:
-  release_tag:
-    description: "Release tag"
-    value: ${{ steps.create_release.outputs.release_tag }}
+  tag_last:
+    description: "Last semver tag detected"
+    value: ${{ steps.semver_last.outputs.last_tag }}
+  semver_last:
+    description: "Last semver detected"
+    value: ${{ steps.semver_last.outputs.last_semver }}
+  tag_next:
+    description: "Next semver tag to be created"
+    value: ${{ steps.semver_next.outputs.next_tag }}
+  semver_next:
+    description: "Next semver to be created"
+    value: ${{ steps.semver_next.outputs.next_semver }}
+  change_compatibility:
+    description: "Change compatibility"
+    value: ${{ steps.pr_data.outputs.change_compatibility }}
+  change_type:
+    description: "Change type"
+    value: ${{ steps.pr_data.outputs.change_type }}
 runs:
   using: "composite"
   steps:
