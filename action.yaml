@@ -58,6 +58,16 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Validate Event
+      shell: bash
+      env:
+        eventType: ${{ github.event_name }}
+      # language=BASH
+      run: |
+        if [ "$eventType" != "pull_request" ]; then
+          echo "This action is only valid on pull request events" >&2
+          exit 1
+        fi
     - name: 'Get Labels'
       id: get_labels
       shell: bash
