@@ -161,7 +161,7 @@ runs:
         set +e
         
         echo "Strict semver matching: $strictSemver"
-        echo "Tags: $tagList"
+        echo 'Tags: ${{ steps.get_tags.outputs.data }}'
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
