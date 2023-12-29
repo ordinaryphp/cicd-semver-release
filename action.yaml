@@ -69,7 +69,17 @@ runs:
         prNumber=$(cut -d/ -f1 <<< "$GITHUB_REF_NAME")
         prPayloadUrl="repos/$GITHUB_REPOSITORY/pulls/$prNumber"
         
-        labels="$(gh api -H "Accept: application/vnd.github+json" "$prPayloadUrl" | jq -c '[.labels[].name]')"
+        echo "GH Api Get: $prPayloadUrl"
+        
+        response="$(gh api -H "Accept: application/vnd.github+json" "$prPayloadUrl")"
+        
+        if [ $? -ne 0 ]; then
+          echo "Api request failed" >&2
+          exit 1
+        fi
+        
+        labels="$(jq -c '[.labels[].name]' <<< "$response")"
+        
         echo "Labels: $labels"
         echo "pr_labels=$labels" >> "$GITHUB_OUTPUT"
     - name: 'Get Pull Request Data'
