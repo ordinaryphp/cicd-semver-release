@@ -142,11 +142,11 @@ runs:
         echo "  Minor: $lastMinor"
         echo "  Patch: $lastPatch"
         
-        echo "lastTag=$tagMatch" >> "$GITHUB_OUTPUT"
-        echo "lastSemver=$semverMatch" >> "$GITHUB_OUTPUT"
-        echo "lastMajor=$lastMajor" >> "$GITHUB_OUTPUT"
-        echo "lastMinor=$lastMinor" >> "$GITHUB_OUTPUT"
-        echo "lastPatch=$lastPatch" >> "$GITHUB_OUTPUT"
+        echo "last_tag=$tagMatch" >> "$GITHUB_OUTPUT"
+        echo "last_semver=$semverMatch" >> "$GITHUB_OUTPUT"
+        echo "last_major=$lastMajor" >> "$GITHUB_OUTPUT"
+        echo "last_minor=$lastMinor" >> "$GITHUB_OUTPUT"
+        echo "last_patch=$lastPatch" >> "$GITHUB_OUTPUT"
     - name: "Get next semver"
       id: semver_next
       shell: bash
@@ -156,9 +156,9 @@ runs:
       # language=BASH
       run: |
         set +e
-        semverMajor='${{ steps.semver_last.outputs.lastMajor }}'
-        semverMinor='${{ steps.semver_last.outputs.lastMinor }}'
-        semverPatch='${{ steps.semver_last.outputs.lastPatch }}'
+        semverMajor='${{ steps.semver_last.outputs.last_major }}'
+        semverMinor='${{ steps.semver_last.outputs.last_minor }}'
+        semverPatch='${{ steps.semver_last.outputs.last_patch }}'
         
         case "$changeCompatibility:$changeType" in
           not-backward-compatible:*)
@@ -188,5 +188,5 @@ runs:
         echo "Next Semver: $semverNext"
         echo "Next Tag: $tagNext"
         
-        echo "semverNext=$semverNext" >> "$GITHUB_OUTPUT"
-        echo "tagNext=$tagNext" >> "$GITHUB_OUTPUT"
+        echo "semver_next=$semverNext" >> "$GITHUB_OUTPUT"
+        echo "tag_next=$tagNext" >> "$GITHUB_OUTPUT"
