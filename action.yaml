@@ -198,7 +198,7 @@ runs:
         if [ "$isMergeComplete" == "true" ]; then
           existingMergeTag="$(git describe --tags --exact-match "$mergeCommit" | filterPrefix | filterSuffix)"
         
-          if [ -n "$existingMergeTag" ]; then
+          if [ -z "$existingMergeTag" ]; then
             echo "Existing semver tag found on current merge commit $existingMergeTag ($mergeCommit)" >&2
             exit 1
           fi
