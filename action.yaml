@@ -132,11 +132,13 @@ runs:
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
+      env:
+        isMergeComplete: github.event.pull_request.merged
+        strictSemver: ${{ inputs.strict_semver_last }}
+        mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
       # language=BASH
       run: |
         set +e
-        
-        strictSemver='${{ inputs.strict_semver_last }}'
         
         echo "Strict semver matching: $strictSemver"
         
@@ -169,6 +171,15 @@ runs:
             fi
           done
         }
+        
+        if [ "$isMergeComplete" == "true" ]; then
+          existingMergeTag="$(git describe --tags --exact-match "$mergeCommit" | filterPrefix | filterSuffix)"
+        
+          if [ -z "$existingMergeTag" ]; then
+            echo "Existing semver tag found on current merge commit $existingMergeTag ($mergeCommit)" >&2
+            exit 1
+          fi
+        fi
         
         tagMatch="$(git tag | filterPrefix | filterSuffix | head -n 1)"
         
