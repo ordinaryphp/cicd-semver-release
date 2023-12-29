@@ -264,7 +264,7 @@ runs:
       if: inputs.create_release && (!inputs.create_if_pr_complete || github.event.pull_request.merged == true)
       shell: bash
       env:
-        GH_TOKEN: ${{ input.token || github.token }}
+        GH_TOKEN: ${{ inputs.token || github.token }}
         releaseTag: ${{ steps.semver_next.outputs.next_tag }}
         releaseSemver: ${{ steps.semver_next.outputs.next_semver }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
