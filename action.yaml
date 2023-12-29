@@ -16,6 +16,10 @@ inputs:
   create_release:
     type: boolean
     default: true
+  create_if_pr_complete:
+    type: boolean
+    description: 'Disable to allow release creation when trigger is not a completed pull request'
+    default: true
   enhancement_label:
     type: string
     description: 'Label that indicates changes includes enhancements or new features'
@@ -221,3 +225,12 @@ runs:
         
         echo "next_semver=$semverNext" >> "$GITHUB_OUTPUT"
         echo "next_tag=$tagNext" >> "$GITHUB_OUTPUT"
+    - name: 'Create Release'
+      id: create_release
+      if: inputs.create_release && (!inputs.create_if_pr_complete || github.event.pull_request.merged == true)
+      shell: bash
+      # language=BASH
+      run: |
+        set +e
+        
+        echo "Creating release"
