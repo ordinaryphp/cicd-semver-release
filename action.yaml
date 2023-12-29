@@ -198,6 +198,7 @@ runs:
           fi
         fi
         
+        echo "Tags: $(git tag)"
         tagMatch="$(git tag | filterPrefix | filterSuffix | head -n 1)"
         
         if [ -z "$tagMatch" ]; then
