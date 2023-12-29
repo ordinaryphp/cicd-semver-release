@@ -142,6 +142,12 @@ runs:
         
         echo "change_type=$changeType" >> "$GITHUB_OUTPUT"
         echo "change_compatibility=$changeCompat" >> "$GITHUB_OUTPUT"
+    - uses: octokit/request-action@v2.x
+      id: get_tags
+      with:
+        route: GET /repos/${{ github.repository }}/git/matching-refs/tags
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
@@ -149,11 +155,13 @@ runs:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
+        tagList: ${{ join(steps.get_tags.outputs.data.*.ref, '\n') }}
       # language=BASH
       run: |
         set +e
         
         echo "Strict semver matching: $strictSemver"
+        echo "Tags: $tagList"
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
@@ -199,7 +207,7 @@ runs:
         fi
         
         echo "Tags: $(git tag)"
-        tagMatch="$(git tag | filterPrefix | filterSuffix | head -n 1)"
+        tagMatch="$(echo "$tagList" | filterPrefix | filterSuffix | head -n 1)"
         
         if [ -z "$tagMatch" ]; then
           echo "No tag found - assuming semver 0.0.0 as last tag"
