@@ -149,29 +149,18 @@ runs:
         route: GET /repos/${{ github.repository }}/git/matching-refs/tags
       env:
         GITHUB_TOKEN: ${{ github.token }}
-    - uses: octokit/request-action@v2.x
-      id: get_merge_tag
-      if: github.event.pull_request.merge_commit_sha
-      with:
-        route: GET /repos/${{ github.repository }}/commits/${{ github.event.pull_request.merge_commit_sha }}
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
       env:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
-        mergeCommit: ${{ steps.get_merge_tag.outputs.data }}
-        mergeTag: ${{ steps.get_merge_tag.outputs.data && fromJSON(steps.get_merge_tag.outputs.data).tag || '' }}
         tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, ' ') }}
       # language=BASH
       run: |
         set +e
-        echo "Merge commit: $mergeCommit"
         tagList="$(sed 's/ /\n/g' <<< "$tagList" | cut -d/ -f3-)"
         echo "Strict semver matching: $strictSemver"
-        echo "TagList: $tagList"
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
@@ -203,14 +192,7 @@ runs:
           done
         }
         
-        if [ -n "$mergeTag" ]; then
-          existingMergeTag="$(filterPrefix <<< "$mergeTag" | filterSuffix)"
-        
-          if [ -n "$existingMergeTag" ]; then
-            echo "Existing semver tag found on current merge commit $existingMergeTag ($mergeCommit)" >&2
-            exit 1
-          fi
-        fi
+        # TODO add support to fail action if caused by merge and merge commit already has semver
         
         echo "Tags: $(git tag)"
         tagMatch="$(echo "$tagList" | filterPrefix | filterSuffix | head -n 1)"
