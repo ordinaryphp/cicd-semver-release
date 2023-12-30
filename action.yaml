@@ -149,6 +149,13 @@ runs:
         route: GET /repos/${{ github.repository }}/git/matching-refs/tags
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - uses: octokit/request-action@v2.x
+      id: get_merge_tag
+      if: github.event.pull_request.merge_commit_sha
+      with:
+        route: GET /repos/${{ github.repository }}/git/tags/${{ github.event.pull_request.merge_commit_sha }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
     - name: 'Get Last Semver'
       id: semver_last
       shell: bash
@@ -156,6 +163,7 @@ runs:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
+        mergeTag: ${{ steps.get_merge_tag.outputs.data && fromJSON(steps.get_merge_tag.outputs.data).tag || '' }}
         tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, ' ') }}
       # language=BASH
       run: |
@@ -195,10 +203,10 @@ runs:
           done
         }
         
-        if [ "$isMergeComplete" == "true" ]; then
-          existingMergeTag="$(git describe --tags --exact-match "$mergeCommit" | filterPrefix | filterSuffix)"
+        if [ -n "$mergeTag" ]; then
+          existingMergeTag="$(filterPrefix <<< "$mergeTag" | filterSuffix)"
         
-          if [ -z "$existingMergeTag" ]; then
+          if [ -n "$existingMergeTag" ]; then
             echo "Existing semver tag found on current merge commit $existingMergeTag ($mergeCommit)" >&2
             exit 1
           fi
