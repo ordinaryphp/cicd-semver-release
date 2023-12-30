@@ -72,6 +72,93 @@ runs:
           echo "This action is only valid on pull request events" >&2
           exit 1
         fi
+    - name: Prepare Branch
+      shell: bash
+      # language=BASH
+      run: |
+        inTree="$(git rev-parse --is-inside-work-tree)"
+        
+        if [ "$inTree" != true ]; then
+          echo "Not in working tree" >&2
+          exit 1
+        fi
+        
+        isShallow="$(git rev-parse --is-shallow-repository)"
+        
+        if [ "$isShallow" != true ]; then
+          echo "Retrieving full commit depth"
+          git fetch --unshallow
+        fi
+        
+        echo "Fetching Tags"
+        git fetch --tags
+    - name: Get Latest Tag
+      id: tag_info
+      shell: bash
+      env:
+        mergeCommit: ${{ github.event.pull_request.merge_commit_sha || '' }}
+      # language=BASH
+      run: |
+        function filterPrefix() {
+          prefix='${{ inputs.prefix }}'
+        
+          if [ -z "$prefix" ] || [ "$strictSemver" == "false" ]; then
+            cat
+            return 0
+          fi
+        
+          while read -r line; do
+            if [ "${line:0:${#prefix}}" == "$prefix" ]; then
+              echo "$line"
+            fi
+          done
+        }
+        
+        function filterSuffix() {
+          suffix='${{ inputs.suffix }}'
+        
+          if [ -z "$suffix" ] || [ "$strictSemver" == "false" ]; then
+            cat
+            return 0
+          fi
+        
+          while read -r line; do
+            if [ "${line: ${#suffix}}" == "$suffix" ]; then
+              echo "$line"
+            fi
+          done
+        }
+        
+        tagLatest="$(git tag | grep -P '\d+\.\d+\.\d+)' | filterPrefix | filterSuffix | sort -Vr | head -n 1)"
+        
+        if [ -z "$tagLatest" ]; then
+          echo "No latest tag found defaulting to 0.0.0"
+          tagLatest='0.0.0'
+        fi
+        
+        if [ -n "$mergeCommit" ]; then
+          mergeCommitTag="$(git describe --tags --exact-match "$mergeCommit" | grep -P '\d+\.\d+\.\d+)' | filterPrefix | filterSuffix)"
+        
+          if [ -n "$mergeCommitTags" ]; then
+            echo "Merge commit already has semver tags: $mergeCommitTags" >&2
+            exit 1
+          fi
+        fi
+        
+        semverLatest="$(grep -Po '(?<!\d)\d+\.\d+\.\d+(?!\d)' <<< "$tagLatest")"
+        IFS=. read lastMajor lastMinor lastPatch <<< "$semverLatest"
+        
+        echo "tagLatest: $tagLatest"
+        echo "semverLatest: $semverLatest"
+        echo "  lastMajor: $lastMajor"
+        echo "  lastMinor: $lastMinor"
+        echo "  lastPatch: $lastPatch"
+        
+        echo "tagLatest=$tagLatest" >> "$GITHUB_OUTPUT"
+        echo "semverLatest=$semverLatest" >> "$GITHUB_OUTPUT"
+        echo "lastMajor=$lastMajor" >> "$GITHUB_OUTPUT"
+        echo "lastMinor=$lastMinor" >> "$GITHUB_OUTPUT"
+        echo "lastPatch=$lastPatch" >> "$GITHUB_OUTPUT"
     - name: 'Get Labels'
       id: get_labels
       shell: bash
@@ -143,80 +230,6 @@ runs:
         
         echo "change_type=$changeType" >> "$GITHUB_OUTPUT"
         echo "change_compatibility=$changeCompat" >> "$GITHUB_OUTPUT"
-    - uses: octokit/request-action@v2.x
-      id: get_tags
-      with:
-        route: GET /repos/${{ github.repository }}/git/matching-refs/tags
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-    - name: 'Get Last Semver'
-      id: semver_last
-      shell: bash
-      env:
-        isMergeComplete: github.event.pull_request.merged
-        strictSemver: ${{ inputs.strict_semver_last }}
-        tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, ' ') }}
-      # language=BASH
-      run: |
-        set +e
-        tagList="$(sed 's/ /\n/g' <<< "$tagList" | cut -d/ -f3-)"
-        echo "Strict semver matching: $strictSemver"
-        echo "Tags: $tagList"
-        
-        function filterPrefix() {
-          prefix='${{ inputs.prefix }}'
-        
-          if [ -z "$prefix" ] || [ "$strictSemver" == "false" ]; then
-            cat
-            return 0
-          fi
-        
-          while read -r line; do
-            if [ "${line:0:${#prefix}}" == "$prefix" ]; then
-              echo "$line"
-            fi
-          done
-        }
-        
-        function filterSuffix() {
-          suffix='${{ inputs.suffix }}'
-        
-          if [ -z "$suffix" ] || [ "$strictSemver" == "false" ]; then
-            cat
-            return 0
-          fi
-        
-          while read -r line; do
-            if [ "${line: ${#suffix}}" == "$suffix" ]; then
-              echo "$line"
-            fi
-          done
-        }
-        
-        # TODO add support to fail action if caused by merge and merge commit already has semver
-        
-        tagMatch="$(echo "$tagList" | filterPrefix | filterSuffix | head -n 1)"
-        
-        if [ -z "$tagMatch" ]; then
-          echo "No tag found - assuming semver 0.0.0 as last tag"
-          semverMatch="0.0.0"
-        else
-          semverMatch="$(echo "$tagMatch" | grep -Po '(?<!\d)\d+\.\d+\.\d+(?!\d)')"
-        fi
-        
-        IFS=. read lastMajor lastMinor lastPatch <<< "$semverMatch"
-        
-        echo "Last tag: ${tagMatch:-(NONE)}"
-        echo "Last semver: $semverMatch"
-        echo "  Major: $lastMajor"
-        echo "  Minor: $lastMinor"
-        echo "  Patch: $lastPatch"
-        
-        echo "last_tag=$tagMatch" >> "$GITHUB_OUTPUT"
-        echo "last_semver=$semverMatch" >> "$GITHUB_OUTPUT"
-        echo "last_major=$lastMajor" >> "$GITHUB_OUTPUT"
-        echo "last_minor=$lastMinor" >> "$GITHUB_OUTPUT"
-        echo "last_patch=$lastPatch" >> "$GITHUB_OUTPUT"
     - name: "Get next semver"
       id: semver_next
       shell: bash
