@@ -159,6 +159,16 @@ runs:
         echo "lastMajor=$lastMajor" >> "$GITHUB_OUTPUT"
         echo "lastMinor=$lastMinor" >> "$GITHUB_OUTPUT"
         echo "lastPatch=$lastPatch" >> "$GITHUB_OUTPUT"
+    - name: 'Determine Version Change Requirements'
+      id: get_changes
+      shell: bash
+      env:
+        sourceHead: ${{ github.event.pull_request.head.sha }}
+        targetHead: ${{ github.event.pull_request.base.sha }}
+      # language=BASH
+      run: |
+        echo "Latest source commit: $sourceHead"
+        echo "Latest target commit: $targetHead"
     - name: 'Get Labels'
       id: get_labels
       shell: bash
