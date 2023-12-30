@@ -161,6 +161,7 @@ runs:
         set +e
         tagList="$(sed 's/ /\n/g' <<< "$tagList" | cut -d/ -f3-)"
         echo "Strict semver matching: $strictSemver"
+        echo "Tags: $tagList"
         
         function filterPrefix() {
           prefix='${{ inputs.prefix }}'
@@ -194,7 +195,6 @@ runs:
         
         # TODO add support to fail action if caused by merge and merge commit already has semver
         
-        echo "Tags: $(git tag)"
         tagMatch="$(echo "$tagList" | filterPrefix | filterSuffix | head -n 1)"
         
         if [ -z "$tagMatch" ]; then
