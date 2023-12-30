@@ -153,7 +153,7 @@ runs:
       id: get_merge_tag
       if: github.event.pull_request.merge_commit_sha
       with:
-        route: GET /repos/${{ github.repository }}/git/tags/${{ github.event.pull_request.merge_commit_sha }}
+        route: GET /repos/${{ github.repository }}/commits/${{ github.event.pull_request.merge_commit_sha }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: 'Get Last Semver'
@@ -162,13 +162,13 @@ runs:
       env:
         isMergeComplete: github.event.pull_request.merged
         strictSemver: ${{ inputs.strict_semver_last }}
-        mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
+        mergeCommit: ${{ steps.get_merge_tag.outputs.data }}
         mergeTag: ${{ steps.get_merge_tag.outputs.data && fromJSON(steps.get_merge_tag.outputs.data).tag || '' }}
         tagList: ${{ join(fromJSON(steps.get_tags.outputs.data).*.ref, ' ') }}
       # language=BASH
       run: |
         set +e
-        
+        echo "Merge commit: $mergeCommit"
         tagList="$(sed 's/ /\n/g' <<< "$tagList" | cut -d/ -f3-)"
         echo "Strict semver matching: $strictSemver"
         echo "TagList: $tagList"
