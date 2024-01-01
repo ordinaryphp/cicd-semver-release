@@ -208,7 +208,7 @@ runs:
         echo "changeType=$changeType"
     - name: "Get next semver"
       id: semver_next
-      if: steps.get_changes.outputs.changeType != "none"
+      if: steps.get_changes.outputs.changeType != 'none'
       shell: bash
       env:
         changeType: ${{ steps.get_changes.outputs.changeType }}
@@ -249,7 +249,7 @@ runs:
         echo "nextTag=$tagNext" >> "$GITHUB_OUTPUT"
     - name: 'Create Release'
       id: create_release
-      if: inputs.create_release && github.event.pull_request.merge_commit_sha && steps.get_changes.outputs.changeType != "none"
+      if: inputs.create_release && github.event.pull_request.merge_commit_sha && steps.get_changes.outputs.changeType != 'none'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token || github.token }}
