@@ -23,22 +23,6 @@ inputs:
     type: boolean
     description: 'Disable to allow release creation when trigger is not a completed pull request'
     default: true
-  enhancement_label:
-    type: string
-    description: 'Label that indicates changes includes enhancements or new features'
-    default: enhancement
-  bug_label:
-    type: string
-    description: 'Label that indicates changes includes bug fixes'
-    default: bug
-  backward_compatible_label:
-    type: string
-    description: 'Label that indicates changes are backward compatible'
-    default: backward-compatible
-  not_backward_compatible_label:
-    type: string
-    description: 'Label that indicates changes are not backward compatible'
-    default: not-backward-compatible
 
 outputs:
   tag_last:
