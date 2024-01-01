@@ -113,7 +113,7 @@ runs:
           done
         }
         
-        tagLatest="$(git tag | grep -P '\d+\.\d+\.\d+)' | filterPrefix | filterSuffix | sort -Vr | head -n 1)"
+        tagLatest="$(git tag | grep -P '\d+\.\d+\.\d+' | filterPrefix | filterSuffix | sort -Vr | head -n 1)"
         
         if [ -z "$tagLatest" ]; then
           echo "No latest tag found defaulting to 0.0.0"
@@ -121,7 +121,7 @@ runs:
         fi
         
         if [ -n "$mergeCommit" ]; then
-          mergeCommitTag="$(git describe --tags --exact-match "$mergeCommit" | grep -P '\d+\.\d+\.\d+)' | filterPrefix | filterSuffix)"
+          mergeCommitTag="$(git describe --tags --exact-match "$mergeCommit" | grep -P '\d+\.\d+\.\d+' | filterPrefix | filterSuffix)"
         
           if [ -n "$mergeCommitTags" ]; then
             echo "Merge commit already has semver tags: $mergeCommitTags" >&2
