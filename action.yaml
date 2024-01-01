@@ -12,6 +12,22 @@ inputs:
     type: string
     description: 'Suffix to add to semver'
     default: ''
+  major_token:
+    type: string
+    description: 'Token in commits to trigger a major version change'
+    default: '#vmajor'
+  minor_token:
+    type: string
+    description: 'Token in commits to trigger a minor version change'
+    default: '#vminor'
+  patch_token:
+    type: string
+    description: 'Token in commits to trigger a patch version change'
+    default: '#vpatch'
+  default_bump:
+    type: string
+    description: 'The default version bump when no tokens are found (major, minor, patch, none)'
+    default: 'none'
   strict_semver_last:
     type: boolean
     description: 'When detecting last semver, requires the semver to have the configured prefix and suffix'
@@ -149,44 +165,79 @@ runs:
       env:
         sourceHead: ${{ github.event.pull_request.head.sha }}
         targetHead: ${{ github.event.pull_request.base.sha }}
+        majorToken: ${{ input.major_token }}
+        minorToken: ${{ input.minor_token }}
+        patchToken: ${{ input.patch_token }}
+        defaultBump: ${{ input.default_bump }}
       # language=BASH
       run: |
         echo "Latest source commit: $sourceHead"
         echo "Latest target commit: $targetHead"
+        
+        echo "Token config:"
+        echo "  Major: $majorToken"
+        echo "  Minor: $minorToken"
+        echo "  Patch: $patchToken"
+        
+        commitLog=$(git log "$sourceHead".."$targetHead" --format=%B)
+        
+        shopt -s nocasematch
+        case "$commitLog" in
+          *$majorToken* ) changeType=major;;
+          *$minorToken* ) changeType=minor;;
+          *$patchToken* ) changeType=patch;;
+        esac
+        
+        if [ -z "$changeType" ]; then
+          echo "No version tokens found in commits" >&2
+        
+          case "$defaultBump" in
+            major|minor|patch|none)
+              echo "Defaulting to $defaultBump"
+              changeType="$defaultBump"
+              ;;
+            error) exit 1;;
+            *)
+              echo "Invalid or empty value for default_bump input" >&2
+              exit 1
+              ;;
+          esac
+        fi
+        
+        echo "Change Type: $changeType"
+        echo "changeType=$changeType"
     - name: "Get next semver"
       id: semver_next
+      if: steps.get_changes.outputs.changeType != "none"
       shell: bash
       env:
-        changeType: ${{ steps.pr_data.outputs.change_type }}
-        changeCompatibility: ${{ steps.pr_data.outputs.change_compatibility }}
+        changeType: ${{ steps.get_changes.outputs.changeType }}
+        semverMajor: ${{ steps.tag_info.outputs.lastMajor }}
+        semverMinor: ${{ steps.tag_info.outputs.lastMinor }}
+        semverPatch: ${{ steps.tag_info.outputs.lastPatch }}
+        prefix: ${{ inputs.prefix }}
+        suffix: ${{ inputs.suffix }}
       # language=BASH
       run: |
         set +e
-        semverMajor='${{ steps.semver_last.outputs.last_major }}'
-        semverMinor='${{ steps.semver_last.outputs.last_minor }}'
-        semverPatch='${{ steps.semver_last.outputs.last_patch }}'
-        
-        case "$changeCompatibility:$changeType" in
-          not-backward-compatible:*)
+        case "$changeType" in
+          major)
             ((semverMajor++))
             semverMinor=0
             semverPatch=0
             ;;
-          backward-compatible:enhancement)
+          minor)
             ((semverMinor++))
             semverPatch=0
             ;;
-          backward-compatible:bug)
+          patch)
             ((semverPatch++))
             ;;
           *)
-            echo "Unsupported change type $changeCompatibility:$changeType" >&2
+            echo "Unsupported change type $changeType" >&2
             exit 1
             ;;
         esac
-        
-        prefix='${{ inputs.prefix }}'
-        suffix='${{ inputs.suffix }}'
         
         semverNext="$semverMajor.$semverMinor.$semverPatch"
         tagNext="${prefix}${semverNext}${suffix}"
@@ -194,16 +245,16 @@ runs:
         echo "Next Semver: $semverNext"
         echo "Next Tag: $tagNext"
         
-        echo "next_semver=$semverNext" >> "$GITHUB_OUTPUT"
-        echo "next_tag=$tagNext" >> "$GITHUB_OUTPUT"
+        echo "nextSemver=$semverNext" >> "$GITHUB_OUTPUT"
+        echo "nextTag=$tagNext" >> "$GITHUB_OUTPUT"
     - name: 'Create Release'
       id: create_release
-      if: inputs.create_release && (!inputs.create_if_pr_complete || github.event.pull_request.merged == true)
+      if: inputs.create_release && github.event.pull_request.merge_commit_sha && steps.get_changes.outputs.changeType != "none"
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token || github.token }}
-        releaseTag: ${{ steps.semver_next.outputs.next_tag }}
-        releaseSemver: ${{ steps.semver_next.outputs.next_semver }}
+        releaseTag: ${{ steps.semver_next.outputs.nextTag }}
+        releaseSemver: ${{ steps.semver_next.outputs.nextSemver }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
       # language=BASH
       run: |
