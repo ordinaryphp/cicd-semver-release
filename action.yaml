@@ -165,10 +165,10 @@ runs:
       env:
         sourceHead: ${{ github.event.pull_request.head.sha }}
         targetHead: ${{ github.event.pull_request.base.sha }}
-        majorToken: ${{ input.major_token }}
-        minorToken: ${{ input.minor_token }}
-        patchToken: ${{ input.patch_token }}
-        defaultBump: ${{ input.default_bump }}
+        majorToken: ${{ inputs.major_token }}
+        minorToken: ${{ inputs.minor_token }}
+        patchToken: ${{ inputs.patch_token }}
+        defaultBump: ${{ inputs.default_bump }}
       # language=BASH
       run: |
         echo "Latest source commit: $sourceHead"
