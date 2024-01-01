@@ -205,7 +205,7 @@ runs:
         fi
         
         echo "Change Type: $changeType"
-        echo "changeType=$changeType"
+        echo "changeType=$changeType" >> "$GITHUB_OUTPUT"
     - name: "Get next semver"
       id: semver_next
       if: steps.get_changes.outputs.changeType != 'none'
