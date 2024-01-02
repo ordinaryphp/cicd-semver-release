@@ -96,7 +96,7 @@ runs:
       id: tag_info
       shell: bash
       env:
-        mergeCommit: ${{ github.event.pull_request.merge_commit_sha || '' }}
+        mergeCommit: ${{ github.event.pull_request.merged && github.event.pull_request.merge_commit_sha || '' }}
       # language=BASH
       run: |
         function filterPrefix() {
@@ -249,7 +249,7 @@ runs:
         echo "nextTag=$tagNext" >> "$GITHUB_OUTPUT"
     - name: 'Create Release'
       id: create_release
-      if: inputs.create_release && github.event.pull_request.merge_commit_sha && steps.get_changes.outputs.changeType != 'none'
+      if: inputs.create_release && github.event.pull_request.merged && github.event.pull_request.merge_commit_sha && steps.get_changes.outputs.changeType != 'none'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token || github.token }}
