@@ -139,7 +139,7 @@ runs:
         if [ -n "$mergeCommit" ]; then
           mergeCommitTag="$(git describe --tags --exact-match "$mergeCommit" | grep -P '\d+\.\d+\.\d+' | filterPrefix | filterSuffix)"
           echo "Merge commit tags ($mergeCommit): $(git describe --tags --exact-match "$mergeCommit")"
-          if [ -n "$mergeCommitTags" ]; then
+          if [ -n "$mergeCommitTag" ]; then
             echo "Merge commit already has semver tags: $mergeCommitTags" >&2
             exit 1
           fi
