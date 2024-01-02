@@ -41,24 +41,21 @@ inputs:
     default: true
 
 outputs:
-  tag_last:
-    description: "Last semver tag detected"
-    value: ${{ steps.semver_last.outputs.last_tag }}
-  semver_last:
-    description: "Last semver detected"
-    value: ${{ steps.semver_last.outputs.last_semver }}
+  tag_latest:
+    description: "Latest semver tag detected"
+    value: ${{ steps.tag_info.outputs.tagLatest }}
+  semver_latest:
+    description: "Latest semver detected"
+    value: ${{ steps.tag_info.outputs.semverLatest }}
   tag_next:
     description: "Next semver tag to be created"
-    value: ${{ steps.semver_next.outputs.next_tag }}
+    value: ${{ steps.semver_next.outputs.tagNext }}
   semver_next:
     description: "Next semver to be created"
-    value: ${{ steps.semver_next.outputs.next_semver }}
-  change_compatibility:
-    description: "Change compatibility"
-    value: ${{ steps.pr_data.outputs.change_compatibility }}
+    value: ${{ steps.semver_next.outputs.semverNext }}
   change_type:
     description: "Change type"
-    value: ${{ steps.pr_data.outputs.change_type }}
+    value: ${{ steps.get_changes.outputs.changeType }}
 runs:
   using: "composite"
   steps:
@@ -248,16 +245,16 @@ runs:
         echo "Next Semver: $semverNext"
         echo "Next Tag: $tagNext"
         
-        echo "nextSemver=$semverNext" >> "$GITHUB_OUTPUT"
-        echo "nextTag=$tagNext" >> "$GITHUB_OUTPUT"
+        echo "semverNext=$semverNext" >> "$GITHUB_OUTPUT"
+        echo "tagNext=$tagNext" >> "$GITHUB_OUTPUT"
     - name: 'Create Release'
       id: create_release
       if: inputs.create_release && github.event.pull_request.merged && github.event.pull_request.merge_commit_sha && steps.get_changes.outputs.changeType != 'none'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token || github.token }}
-        releaseTag: ${{ steps.semver_next.outputs.nextTag }}
-        releaseSemver: ${{ steps.semver_next.outputs.nextSemver }}
+        releaseTag: ${{ steps.semver_next.outputs.tagNext }}
+        releaseSemver: ${{ steps.semver_next.outputs.semverNext }}
         mergeCommit: ${{ github.event.pull_request.merge_commit_sha }}
       # language=BASH
       run: |
