@@ -34,10 +34,7 @@ inputs:
     default: false
   create_release:
     type: boolean
-    default: true
-  create_if_pr_complete:
-    type: boolean
-    description: 'Disable to allow release creation when trigger is not a completed pull request'
+    description: 'Use this to add additional conditions for or for not creating a release'
     default: true
 
 outputs:
