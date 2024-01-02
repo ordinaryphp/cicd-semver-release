@@ -179,7 +179,7 @@ runs:
         echo "  Minor: $minorToken"
         echo "  Patch: $patchToken"
         
-        commitLog=$(git log "$sourceHead".."$targetHead" --format=%B)
+        commitLog=$(git log --format=%B "$targetHead".."$sourceHead")
         
         shopt -s nocasematch
         case "$commitLog" in
